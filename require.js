@@ -75,7 +75,7 @@
 	//定义模块
 	//返回：模块对象
 	win.define = function () {
-		var module = {};
+		var module = { window:win };
 
 		//判断调用参数数量
 		if (arguments.length == 1) {
