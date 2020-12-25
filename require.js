@@ -13,6 +13,7 @@
 				if (typeof (p) == "string") throw "The asynchronous module uses multiple string array parameters";
 			} else {
 				if (typeof (p) != "string") throw "The synchronization module uses a single string parameter";
+				p = [p];
             }
 
 			p.forEach(function (path, pathIndex) {
