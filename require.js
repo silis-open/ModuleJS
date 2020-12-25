@@ -14,7 +14,7 @@
 			} else {
 				if (typeof (p) != "string") throw "The synchronization module uses a single string parameter";
 				p = [p];
-            }
+			}
 
 			p.forEach(function (path, pathIndex) {
 				var fullPath = basePath + "/" + path + ".js";
