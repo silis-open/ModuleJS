@@ -17,7 +17,7 @@
 			}
 
 			p.forEach(function (path, pathIndex) {
-				var fullPath = basePath + "/" + path + ".js";
+				var fullPath = basePath + "/" + path;
 				fullPath = fullPath.replace("//", "/");
 
 				var module = win.modules[fullPath];
