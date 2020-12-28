@@ -16,17 +16,41 @@
 				p = [p];
 			}
 
-			p.forEach(function (path, pathIndex) {
-				var fullPath = basePath + "/" + path;
-				fullPath = fullPath.replace("//", "/");
+			var commonPathValues = {};
+			commonPathValues.require = require;
+			commonPathValues.exports = {};
+			commonPathValues.module = { exports:commonPathValues.exports };
 
-				var module = win.modules[fullPath];
-				//判断模块是否存在本地
-				if (module) { //模块已存在于本地
-					resultArr[pathIndex] = moduleService.require_define_exports(module, async, asyncArr);
-				} else { //模块不存在于本地
-					//由于模块不存在于本地，因此需要使用Promise做异步加载模块
-					var promise = new Promise(function (resolve, reject) {
+			p.forEach(function (path, pathIndex) {
+
+				var commonPathValue = commonPathValues[path];
+				if(commonPathValue){
+					resultArr.push(commonPathValue);
+					return;
+				}
+
+				var fullPath = basePath + "/" + path;
+				fullPath = fullPath.replace(/\/\/+/g, "/");
+
+				//每一个地址可能会做异步处理
+				var promise = new Promise(function (resolve, reject) {
+
+					var module = win.modules[fullPath];
+					//判断模块是否存在本地
+					if (module) { //模块已存在于本地
+						//判断已存在的模块是否在加载中
+						if(!module.promise){ //已加载
+							moduleService_require_define_exports(fullPath, win, require, module, async, function(result){
+								resultArr[pathIndex] = result;
+								resolve(result);
+							});
+						} else { //加载中
+							module.promise.then(function (result){
+								resultArr[pathIndex] = result;
+								resolve(result);
+							})
+						}
+					} else { //模块不存在于本地
 						//发送ajax请求获取远程模块代码
 						win.$.ajax({
 							async: async, //如果没有传递回调函数，则需要同步返回模块Exports，就需要同步加载模块。如果有回调函数，则可以异步加载模块。
@@ -34,27 +58,40 @@
 							url: fullPath,
 							dataType: "text",
 							success: function (remoteModuleCode) {
-								win.define.name = fullPath;
 								win.eval.call(win, remoteModuleCode); //执行define
-								win.define.name = null;
-								resultArr[pathIndex] = moduleService.require_define_exports(win.modules[fullPath], async, asyncArr); 
-								//defer.call(requiredArr[pathIndex2]);
-								resolve(resultArr[pathIndex]);
+
+								//如果执行的代码没有执行define模块，则定义一个空的模块
+								if(require.justModule == null){
+									require.justModule = define(function(){});
+								}
+
+								win.modules[fullPath] = require.justModule;
+								require.justModule.promise = null;
+								require.justModule = null;
+
+								moduleService_require_define_exports(fullPath, win, require, win.modules[fullPath], async, function(result){
+									resultArr[pathIndex] = result;
+									resolve(result);
+								});
 							}, error: function (e) {
-								//defer.fail(e);
+								win.modules[fullPath] = null;
 								reject(e);
 							}
 						});
-					});
+					};
+				});
 
-					asyncArr.push(promise);
-				};
+				//如果还未加载进来，则赋予一个带promise属性的模块对象，表示加载中的模块
+				if(!win.modules[fullPath]) win.modules[fullPath] = { promise:promise };
+
+				asyncArr.push(promise);
 			});
 
 			if (async) {
+				var time = new Date().getTime();
 				return Promise.all(asyncArr).then(function (results) {
 					return cb.apply(win, resultArr);
-				})
+				});
 			} else {
 				if (p.length <= 1) return resultArr[0]; else return resultArr;
             }
@@ -85,57 +122,74 @@
 		} else if (arguments.length == 2) {
 			module.requires = arguments[0]; //模块内部需要的模块名称的列表
 			module.define = arguments[1]; //模块Exports的定义脚本
-        }
+        } else if (arguments.length == 3) {
+			module.name = arguments[0];
+			modules[module.name] = module;
+			module.requires = arguments[1]; //模块内部需要的模块名称的列表
+			module.define = arguments[2]; //模块Exports的定义脚本
+		}
+		else throw "202012262004";
 
-		if (win.define.name != null) win.modules[win.define.name];
+		win.require.justModule = module;
+		setTimeout(function(){
+			if(win.require.justModule == module) win.require.justModule = null;
+		}, 1000);
+
 		return module;
 	};
 
+	win.define.amd = {}; //表示支持amd
+
 	//所有模块对象
-	win.modules = {};
+	win.modules = {
+	};
 
 	//用于处理模块的服务
-	var moduleService = {
-		//处理模块依赖，然后执行模块定义，最后返回模块Exports
-		require_define_exports: function (win2, require, module, async, asyncArr) {
-			//判断模块是否未完成定义
-			if (!module.defined) {
-				//如果没有传递回调函数，则用同步编码方式处理。如果有回调函数，则用异步编码方式处理。
-				if (async) { //有回调函数，将使用异步编码方式处理。
-					asyncArr.push(new Promise(function (resolve) {
-						//处理依赖模块需要
-						win.require(module.requires, function () {
-							//处理依赖模块需要
-							for (var i = 0; i < module.requires.length; i++) win.require(module.requires[i]);
+	var moduleService_require_define_exports = function (name, win2, require, module, async, resolve) {
+		if(module == null) throw "Module not found:" + name;
 
-							//returnExports用于实现AMD的return exports
-							var returnExports = module.define.apply(win2, arguments);
-							//不允许同时存在module.exports和return exports两种实现方式，只能选择一种实现方式。即不能同时实现amd和cmd。
-							if (returnExports != null) throw "Asynchronous module export with return exports";
-							//从return exports或者module.exports得到模块的exports
-							module.exports = returnExports;
-							//设置模块为已定义完成状态
-							module.defined = true;
-							resolve(); 
-						});
-					}));
-				} else { //没有回调函数，将使用同步编码方式处理。
-					//处理依赖模块需要
-					for (var i = 0; i < module.requires.length; i++) win.require(module.requires[i]);
+		//判断模块是否未完成定义
+		if (!module.defined) {
+			//如果没有传递回调函数，则用同步编码方式处理。如果有回调函数，则用异步编码方式处理。
+			if (async) { //有回调函数，将使用异步编码方式处理。
+				//处理依赖模块需要
+				win.require(module.requires, function () {
+					var justModule = win.require.justModule;
+					win.require.justModule = null;
 
-					//paramModule用于实现CMD的module.exports
-					var paramModule = {};
 					//returnExports用于实现AMD的return exports
-					var returnExports = module.define.call(win2, require, paramModule);
-					//不允许同时存在module.exports和return exports两种实现方式，只能选择一种实现方式。即不能同时实现amd和cmd。
-					if (returnExports != null) throw "Synchronization module export by module.exports";
+					var returnExports = module.define.apply(win2, arguments);
+
 					//从return exports或者module.exports得到模块的exports
-					module.exports = paramModule.exports;
+					module.exports = returnExports;
+
+					//从参数module或exports获取结果
+					for(var i = 0; i < arguments.length; i++){
+						var path = module.requires[i];
+						if(path == "module") module.exports = arguments[i].exports;
+						else if(path == "exports") module.exports = arguments[i];
+					}
+							
 					//设置模块为已定义完成状态
 					module.defined = true;
-				}
+					resolve(module.exports);
+				});
+			} else { //没有回调函数，将使用同步编码方式处理。
+				//处理依赖模块需要
+				for (var i = 0; i < module.requires.length; i++) win.require(module.requires[i]);
+
+				//paramModule用于实现CMD的module.exports
+				var paramModule = {};
+				//returnExports用于实现AMD的return exports
+				var returnExports = module.define.call(win2, win2.require, paramModule);
+				//不允许同时存在module.exports和return exports两种实现方式，只能选择一种实现方式。即不能同时实现amd和cmd。
+				if (returnExports != null) throw "Synchronization module export by module.exports";
+				//从return exports或者module.exports得到模块的exports
+				module.exports = paramModule.exports;
+				//设置模块为已定义完成状态
+				module.defined = true;
+				resolve(module.exports);
 			}
-			return module.exports;
-		}
-	};
+		} else resolve(module.exports);
+	}
 })(window);
