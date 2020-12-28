@@ -1,4 +1,27 @@
 (function (win) {
+	//获取上级目录
+	var path_up = function(path){
+		if(path[path.length-1] == "/") path = path.substring(0, path.length-1);
+		var indexOf = path.lastIndexOf("/");
+		return path.substring(0, indexOf);
+	}
+
+	//简化目录，去掉重复的“//”，或简化“..”
+	var path_simple = function(path){
+		path = path.replace(/\/\/+/g, "/");
+		var arr = path.split("/");
+		var arr2 = [];
+		for(var i = 0; i < arr.length; i++){
+			var item = arr[i];
+			if(item == ".."){
+				arr2.pop();
+			} else {
+				arr2.push(item);
+			}
+		}
+		return arr2.join("/");
+	}
+
 	//用于创建一个具有基本路径上下文的require（需要模块）
 	var createRequireContext = function(basePath){
 		basePath = basePath || "/";
@@ -29,8 +52,7 @@
 					return;
 				}
 
-				var fullPath = basePath + "/" + path;
-				fullPath = fullPath.replace(/\/\/+/g, "/");
+				var fullPath = path_simple(basePath + "/" + path);
 
 				//每一个地址可能会做异步处理
 				var promise = new Promise(function (resolve, reject) {
@@ -98,11 +120,11 @@
 			
 		};
 
-		require.path = function(path){
-			path = basePath + "/" + path;
-			path = path.replace("//", "/").replace(/(\/[^\/]+)?\/\.\./g,"");
-			return createRequireContext(path);
-		};
+//		require.path = function(path){
+//			path = basePath + "/" + path;
+//			path = path.replace("//", "/").replace(/(\/[^\/]+)?\/\.\./g,"");
+//			return createRequireContext(path);
+//		};
 
 		return require;
 	};
@@ -112,21 +134,21 @@
 
 	//定义模块
 	//返回：模块对象
-	win.define = function () {
+	win.define = function (a0,a1,a2) {
 		var module = { window:win };
 
 		//判断调用参数数量
 		if (arguments.length == 1) {
 			module.requires = []; //模块内部需要的模块名称的列表
-			module.define = arguments[0]; //模块Exports的定义脚本
+			module.define = a0; //模块Exports的定义脚本
 		} else if (arguments.length == 2) {
-			module.requires = arguments[0]; //模块内部需要的模块名称的列表
-			module.define = arguments[1]; //模块Exports的定义脚本
+			module.requires = a0; //模块内部需要的模块名称的列表
+			module.define = a1; //模块Exports的定义脚本
         } else if (arguments.length == 3) {
-			module.name = arguments[0];
+			module.name = a0;
 			modules[module.name] = module;
-			module.requires = arguments[1]; //模块内部需要的模块名称的列表
-			module.define = arguments[2]; //模块Exports的定义脚本
+			module.requires = a1; //模块内部需要的模块名称的列表
+			module.define = a2; //模块Exports的定义脚本
 		}
 		else throw "202012262004";
 
@@ -181,7 +203,7 @@
 				//paramModule用于实现CMD的module.exports
 				var paramModule = {};
 				//returnExports用于实现AMD的return exports
-				var returnExports = module.define.call(win2, win2.require, paramModule);
+				var returnExports = module.define.call(win2, createRequireContext(path_up(name)), paramModule);
 				//不允许同时存在module.exports和return exports两种实现方式，只能选择一种实现方式。即不能同时实现amd和cmd。
 				if (returnExports != null) throw "Synchronization module export by module.exports";
 				//从return exports或者module.exports得到模块的exports
