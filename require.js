@@ -80,12 +80,13 @@
 							url: fullPath,
 							dataType: "text",
 							success: function (remoteModuleCode) {
+								if(async) win.define.amd = {}; //表示支持amd
 								win.eval.call(win, remoteModuleCode); //执行define
+								if(async) win.define.amd = null; //取消amd
 
 								//如果执行的代码没有执行define模块，则定义一个空的模块
-								if(require.justModule == null){
+								if(require.justModule == null)
 									require.justModule = define(function(){});
-								}
 
 								win.modules[fullPath] = require.justModule;
 								require.justModule.promise = null;
@@ -146,7 +147,7 @@
 			module.define = a1; //模块Exports的定义脚本
         } else if (arguments.length == 3) {
 			module.name = a0;
-			modules[module.name] = module;
+			win.modules[module.name] = module;
 			module.requires = a1; //模块内部需要的模块名称的列表
 			module.define = a2; //模块Exports的定义脚本
 		}
@@ -159,8 +160,6 @@
 
 		return module;
 	};
-
-	win.define.amd = {}; //表示支持amd
 
 	//所有模块对象
 	win.modules = {
@@ -176,7 +175,7 @@
 			if (async) { //有回调函数，将使用异步编码方式处理。
 				//处理依赖模块需要
 				win.require(module.requires, function () {
-					var justModule = win.require.justModule;
+					//var justModule = win.require.justModule;
 					win.require.justModule = null;
 
 					//returnExports用于实现AMD的return exports
