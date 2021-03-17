@@ -1,7 +1,7 @@
 # SiliqueJS
 
 ### 介绍
-SiliqueJS，是一个同时兼容CommonJS、CMD、AMD、UMD等规范的js模块管理
+SiliqueJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
 
 ### AMD规范
 
