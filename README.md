@@ -1,9 +1,9 @@
 # SiliqueJS
 
-#### 介绍
+### 介绍
 SiliqueJS，是一个同时兼容CommonJS、CMD、AMD、UMD等规范的js模块管理
 
-#### AMD规范
+### AMD规范
 
 > AMD规范指异步模块定义(Asynchronous Module Definition)，即通过异步方式加载模块
 
@@ -56,7 +56,7 @@ define(["print-amd-module.js"], function(print){
 ```
 > 代码文件：/example/async-load-amd-module-exmaple.html
 
-#### CMD规范
+### CMD规范
 
 CMD规范定义模块：
 
