@@ -1,11 +1,11 @@
 # require
 
 #### 介绍
-同时兼容commonJS/cmd/amd的js模块管理
+同时兼容commonJS/cmd/require/amd/umd的js模块管理
 
-#### cmd
+#### requireJs/amd
 
 ```
-define()
+require("")
 ```
 
