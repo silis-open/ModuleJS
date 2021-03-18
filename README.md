@@ -12,17 +12,18 @@ ModuleJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
 
 ### 通过return导出模块
 
-> 属于AMD规范
-
 ```
 define(function(){
     return ... //导出任意数据类型的模块
 })
 ```
 
+
 ### 通过exports导出模块
 
-1. 
+
+1. 通过define默认参数的exports导出模块
+
 ```
 define(function(require, exports, module){
     //规定导出exports对象类型的模块
@@ -30,7 +31,8 @@ define(function(require, exports, module){
 })
 ```
 
-2. 
+2. 通过define指定参数的exports导出模块
+
 ```
 define(["exports"], function(exports){
     //规定导出exports对象类型的模块
@@ -38,11 +40,20 @@ define(["exports"], function(exports){
 })
 ```
 
-3.
+|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
+|--|--|--|--|--|--|
+|×|×|×|×|√|√|
+
+
+3. 通过默认变量exports导出模块
 
 ```
 exports.sayHello = ... //在即将导出exports对象上加成员
 ```
+
+|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
+|--|--|--|--|--|--|
+|×|×|×|√|×|×|
 
 
 ### 通过module.exports导出模块
@@ -61,11 +72,78 @@ define(["module"], function(module){
 })
 ```
 
-3.
+3. CommonJS规范
 
 ```
 module.exports = ... //导出任意数据类型的模块
 ```
+
+### 通过全局变量导出模块
+
+```
+(
+    (typeof window == "object" && window) ||
+    (typeof global == "object" && global)
+).myModule = ... //导出任意数据类型的模块
+```
+
+|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
+|--|--|--|--|--|--|
+|√|√|√|√|√|√|
+
+### 通过UMD规范导出模块
+
+
+```
+((root, factory) => {
+    if (typeof define === "function" && define.amd) {
+        //AMD
+        define(["dependentModule1", "dependentModule2"...], factory);
+    } else if (typeof exports === 'object') {
+        //CommonJS
+        module.exports = factory(requie("dependentModule1"), requie("dependentModule2")...);
+    } else {
+        root.currentModule = factory(root.dependentModule1, root.dependentModule2);
+    }
+})(this, (dependentModule1, dependentModule2...) => {
+    //todo
+})
+```
+
+|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
+|--|--|--|--|--|--|--|
+|√|√|-|-|-|√|√|
+
+|RequireJS + HTML Script|ModuleJS + HTML Script|
+|--|--|
+|×|√|
+
+
+### 子模块
+
+```
+define(["module1", "module2"], function(module1, module2){
+    var mainModule = { module1:module1, module2:module2 };
+    return mainModule;
+})
+```
+
+
+```
+define(["require"], function(require){
+    
+})
+```
+
+
+```
+define(["require"], function(){
+    
+})
+```
+
+
+
 
 
 ### AMD规范示例
@@ -115,7 +193,7 @@ define(["print-amd-module.js"], function(print){
         </script>
     </head>
     <body>
-        加模异步模块中...
+        加载异步模块中...
     </body>
 </html>
 ```
@@ -163,7 +241,7 @@ define(function(require, exports, module){
         </script>
     </head>
     <body>
-        加模异步模块中...
+        加载异步模块中...
     </body>
 </html>
 ```
