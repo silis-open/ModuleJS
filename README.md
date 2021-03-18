@@ -1,7 +1,7 @@
 # ModuleJS
 
 ### 介绍
-ModuleJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
+ModuleJS，是一个遵循GMD、CMD、AMD、UMD规范的js模块管理
 
 ### 文件大小
 |文件名|文件大小|文件说明|
@@ -17,6 +17,15 @@ define(function(){
     return ... //导出任意数据类型的模块
 })
 ```
+
+|全局变量模块的导入方式|是否支持|
+|--|--|
+|HTML Script|×|
+|AMD规范/RequireJS|√|
+|CMD规范|×|
+|CommonJS规范|×|
+|ES Module规范|×|
+|ModuleJS|√|
 
 
 ### 通过exports导出模块
@@ -40,9 +49,14 @@ define(["exports"], function(exports){
 })
 ```
 
-|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
-|--|--|--|--|--|--|
-|×|×|×|×|√|√|
+|全局变量模块的导入方式|是否支持|
+|--|--|
+|HTML Script|×|
+|AMD规范/RequireJS|√|
+|CMD规范|×|
+|CommonJS规范|×|
+|ES Module规范|×|
+|ModuleJS|√|
 
 
 3. 通过默认变量exports导出模块
@@ -51,9 +65,14 @@ define(["exports"], function(exports){
 exports.sayHello = ... //在即将导出exports对象上加成员
 ```
 
-|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
-|--|--|--|--|--|--|
-|×|×|×|√|×|×|
+|全局变量模块的导入方式|是否支持|
+|--|--|
+|HTML Script|×|
+|AMD规范/RequireJS|×|
+|CMD规范|×|
+|CommonJS规范|√|
+|ES Module规范|×|
+|ModuleJS|×|
 
 
 ### 通过module.exports导出模块
@@ -87,9 +106,15 @@ module.exports = ... //导出任意数据类型的模块
 ).myModule = ... //导出任意数据类型的模块
 ```
 
-|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
-|--|--|--|--|--|--|
-|√|√|√|√|√|√|
+|全局变量模块的导入方式|是否支持|
+|--|--|
+|HTML Script|√|
+|AMD规范/RequireJS|√|
+|CMD规范|√|
+|CommonJS规范|√|
+|ES Module规范|√|
+|ModuleJS|√|
+
 
 ### 通过UMD规范导出模块
 
@@ -105,18 +130,24 @@ module.exports = ... //导出任意数据类型的模块
     } else {
         root.currentModule = factory(root.dependentModule1, root.dependentModule2);
     }
-})(this, (dependentModule1, dependentModule2...) => {
-    //todo
-})
+})(
+    (typeof window == "object" && window) || (typeof global == "object" && global), 
+    (dependentModule1, dependentModule2...) => {
+        //todo
+    }
+)
 ```
 
-|HTML Script|AMD规范/RequireJS|CMD规范|CommonJS规范|ES Module规范|ModuleJS|
-|--|--|--|--|--|--|--|
-|√|√|-|-|-|√|√|
-
-|RequireJS + HTML Script|ModuleJS + HTML Script|
+|UMD模块的导入方式|是否支持|
 |--|--|
-|×|√|
+|HTML Script|√|
+|AMD规范/RequireJS|√|
+|CMD规范|√|
+|CommonJS规范|√|
+|ES Module规范|√|
+|ModuleJS|√|
+|RequireJS + HTML Script|×|
+|ModuleJS + HTML Script|√|
 
 
 ### 子模块
