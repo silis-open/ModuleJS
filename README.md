@@ -3,6 +3,14 @@
 ### 介绍
 RequireJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
 
+#### 文件大小
+|文件名|文件大小|文件说明|
+|--|--|--|
+|require.min.js.zip|1.15k|js代码压缩 + zip压缩，用于网络要求更高的生产运营环境|
+|require.min.js|2.4k|js代码压缩，用于生产运营时使用|
+|require.js|7.3k|js源代码，用于开发测试时使用|
+
+
 ### AMD规范
 
 > AMD规范指异步模块定义（Asynchronous Module Definition），即通过异步方式加载模块
