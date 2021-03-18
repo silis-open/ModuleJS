@@ -1,4 +1,4 @@
-# RequireJS
+# ModuleJS
 
 ### 介绍
 ModuleJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
