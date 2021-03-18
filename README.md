@@ -1,7 +1,7 @@
 # RequireJS
 
 ### 介绍
-RequireJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
+ModuleJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
 
 #### 文件大小
 |文件名|文件大小|文件说明|
