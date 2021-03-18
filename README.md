@@ -11,7 +11,7 @@ ModuleJS，是一个同时兼容CMD、AMD、UMD规范的js模块管理
 |require.js|7.3k|js源代码，用于开发测试时使用|
 
 
-### AMD规范
+### AMD规范示例
 
 > AMD规范指异步模块定义（Asynchronous Module Definition），即通过异步方式加载模块
 
@@ -64,7 +64,7 @@ define(["print-amd-module.js"], function(print){
 ```
 > 代码文件：/example/async-load-amd-module-exmaple.html
 
-### CMD规范
+### CMD规范示例
 
 > CMD规范指同步模块定义（Common Module Definition），即通过同步方式加载模块
 
