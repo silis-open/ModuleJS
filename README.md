@@ -21,7 +21,7 @@ define(function(){
 
 2. 定义别名模块
 ```
-define("myModule.js",function(){
+define("myModule.js",[],function(){
     ...
 })
 ```
@@ -83,16 +83,55 @@ define(["exports"], function(exports){
 
 ### 导入模块（import module）
 
-- 同步导入模块
+1. 同步导入模块
 
+- 同步导入单个模块
 ```
 var myModule = require("myModule.js");
 ```
+或
+```
+var myModule = require("myModule.js", false);
+```
 
-- 异步导入模块
+- 同步导入多个模块
+```
+var myModule1 = require("myModule1.js");
+var myModule2 = require("myModule2.js");
+```
+或
+```
+var myModule1 = require("myModule1.js", false);
+var myModule2 = require("myModule2.js", false);
+```
 
+2. 异步导入模块
+
+- 异步导入单个模块
+```
+require("myModule.js", function(myModule){
+    ...
+})
+```
+或
+```
+var myModulePromise = require("myModule.js", true);
+myModulePromise.then(function(myModule){
+    ...
+})
+```
+
+- 异步导入多个模块
 ```
 require(["myModule1.js"...], function(myModule1...){
+    ...
+})
+```
+或
+```
+var myModulesPromise = require(["myModule1.js"...], true);
+myModulesPromise.then(function(modules){
+    var myModule1 = modules[0];
     ...
 })
 ```
@@ -111,7 +150,7 @@ define(["dependentModule1.js"...], function(dependentModule1...){
 })
 ```
 
-2. 延迟依赖模块
+2. 延迟同步依赖模块
 
 ```
 define(function(){
@@ -123,22 +162,17 @@ define(function(){
 })
 ```
 
-
+3. 延迟异步依赖模块
 ```
 define(function(){
     var mainModule = {};
 
-    return require(["dependentModule1.js"...], function(dependentModule1...){
-        mainModule.dependentModule1 = dependentModule1;
+    require(["dependentModule1.js"...], function(dependentModule1...){
+            mainModule.dependentModule1 = dependentModule1;
         return mainModule;
-    });
+    })
 })
 ```
-
-
-
-
-
 
 
 
