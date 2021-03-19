@@ -139,7 +139,7 @@ myModulesPromise.then(function(modules){
 
 ### 依赖模块（dependent module）
 
-1. 提前依赖模块
+1. 提前导入依赖模块
 ```
 define(["dependentModule1.js"...], function(dependentModule1...){
     var mainModule = {
@@ -150,7 +150,7 @@ define(["dependentModule1.js"...], function(dependentModule1...){
 })
 ```
 
-2. 延迟同步依赖模块
+2. 推后导入同步依赖模块
 
 ```
 define(function(){
@@ -162,7 +162,7 @@ define(function(){
 })
 ```
 
-3. 延迟异步依赖模块
+3. 推后导入异步依赖模块
 ```
 define(function(){
     var mainModule = {};
