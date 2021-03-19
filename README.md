@@ -167,8 +167,8 @@ define(function(){
 define(function(){
     var mainModule = {};
 
-    require(["dependentModule1.js"...], function(dependentModule1...){
-            mainModule.dependentModule1 = dependentModule1;
+    return require(["dependentModule1.js"...], function(dependentModule1...){
+        mainModule.dependentModule1 = dependentModule1;
         return mainModule;
     })
 })
