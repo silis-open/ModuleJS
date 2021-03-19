@@ -6,117 +6,71 @@ ModuleJS，是一个遵循CMD、AMD、UMD规范的js模块管理
 ### 文件大小
 |文件名|文件大小|文件说明|
 |--|--|--|
-|require.min.js.zip|1.15k|js代码压缩 + zip压缩，用于网络要求更高的生产运营环境|
-|require.min.js|2.4k|js代码压缩，用于生产运营时使用|
-|require.js|7.3k|js源代码，用于开发测试时使用|
+|module.min.js.zip|1.15k|js代码压缩 + zip压缩，用于网络要求更高的生产运营环境|
+|module.min.js|2.4k|js代码压缩，用于生产运营时使用|
+|module.js|7.3k|js源代码，用于开发测试时使用|
 
-### 定义返回模块（define return module）
+### 定义模块（define module）
 
-定义返回模块（define return module），指通过“define”定义模块，通过“return”返回模块。
-
+1. 定义模块
 ```
 define(function(){
-    return ... //导出任意数据类型的模块
+    ...
 })
 ```
 
-不同导入方式对“定义返回模块”的导入支持：
-|导入方式|是否支持|
-|--|--|
-|HTML Script|×|
-|AMD规范/RequireJS|√|
-|CMD规范|×|
-|CommonJS规范|×|
-|ES Module规范|×|
-|ModuleJS|√|
+2. 定义别名模块
+```
+define("myModule.js",function(){
+    ...
+})
+```
+
 
 ### 导出模块（export module）
 
-导出模块（export module），指通过global、return、exports、module.exports、export进行导出模块。
-
-
-### 定义导出模块（define exports module）
-
-定义导出模块（define exports module），指通过“define”定义模块，通过“exports”或“module.exports”导出模块。
-
-### 定义依赖导出模块（define dependent exports mocule）
-
-1. 定义导出模块（define exports module），指通过“define”定义模块，通过默认参数的exports导出模块
-
+1. return导出模块
 ```
-define(function(require, exports, module){
-    //规定导出exports对象类型的模块
-    exports.sayHello = ... //在即将导出exports对象上加成员
+define(function(){
+    return ... //返回任意数据类型的模块
 })
 ```
 
-2. 通过define指定参数的exports导出模块
+2. exports导出模块
+
+- 默认依赖exports导出模块
+```
+define(function(require, exports, module){
+    exports.sayHello = ...
+})
+```
+
+- 指定依赖exports导出模块
 
 ```
 define(["exports"], function(exports){
-    //规定导出exports对象类型的模块
-    exports.sayHello = ... //在即将导出exports对象上加成员
+    exports.sayHello = ...
 })
 ```
 
-不同导入方式是否支持导入全局变量模块：
-|导入方式|导入支持|
-|--|--|
-|HTML Script|×|
-|AMD规范/RequireJS|√|
-|CMD规范|×|
-|CommonJS规范|×|
-|ES Module规范|×|
-|ModuleJS|√|
+3. module.exports导出模块
 
-
-3. 通过默认变量exports导出模块
-
-```
-exports.sayHello = ... //在即将导出exports对象上加成员
-```
-
-|全局变量模块的导入方式|是否支持|
-|--|--|
-|HTML Script|×|
-|AMD规范/RequireJS|×|
-|CMD规范|×|
-|CommonJS规范|√|
-|ES Module规范|×|
-|ModuleJS|×|
-
-
-### 通过module.exports导出模块
-
-1. 
+- 默认依赖module.exports导出模块
 ```
 define(function(require, exports, module){
-    module.exports = ... //导出任意数据类型的模块
+    module.exports = ...
+})
+
+```
+- 指定依赖module.exports导出模块
+
+```
+define(["exports"], function(exports){
+    module.exports = ...
 })
 ```
 
-2. 
-```
-define(["module"], function(module){
-    module.exports = ... //导出任意数据类型的模块
-})
-```
-
-3. CommonJS规范
-
-
-
-
-|导入方式|是否支持|
-|--|--|
-|HTML Script|√|
-|AMD规范/RequireJS|√|
-|CMD规范|√|
-|CommonJS规范|√|
-|ES Module规范|√|
-|ModuleJS|√|
-
-### 通过全局变量导出模块
+4. 全局变量导出模块
 
 ```
 (
@@ -125,72 +79,65 @@ define(["module"], function(module){
 ).myModule = ... //导出任意数据类型的模块
 ```
 
-|全局变量模块的导入方式|是否支持|
-|--|--|
-|HTML Script|√|
-|AMD规范/RequireJS|√|
-|CMD规范|√|
-|CommonJS规范|√|
-|ES Module规范|√|
-|ModuleJS|√|
 
 
-### 通过UMD规范导出模块
+### 导入模块（import module）
 
+- 同步导入模块
 
 ```
-((root, factory) => {
-    if (typeof define === "function" && define.amd) {
-        //AMD
-        define(["dependentModule1", "dependentModule2"...], factory);
-    } else if (typeof exports === 'object') {
-        //CommonJS
-        module.exports = factory(requie("dependentModule1"), requie("dependentModule2")...);
-    } else {
-        root.currentModule = factory(root.dependentModule1, root.dependentModule2);
-    }
-})(
-    (typeof window == "object" && window) || (typeof global == "object" && global), 
-    (dependentModule1, dependentModule2...) => {
-        //todo
-    }
-)
+var myModule = require("myModule.js");
 ```
 
-|UMD模块的导入方式|是否支持|
-|--|--|
-|HTML Script|√|
-|AMD规范/RequireJS|√|
-|CMD规范|√|
-|CommonJS规范|√|
-|ES Module规范|√|
-|ModuleJS|√|
-|RequireJS + HTML Script|×|
-|ModuleJS + HTML Script|√|
-
-
-### 子模块
+- 异步导入模块
 
 ```
-define(["module1", "module2"], function(module1, module2){
-    var mainModule = { module1:module1, module2:module2 };
+require(["myModule1.js"...], function(myModule1...){
+    ...
+})
+```
+
+
+### 依赖模块（dependent module）
+
+1. 提前依赖模块
+```
+define(["dependentModule1.js"...], function(dependentModule1...){
+    var mainModule = {
+        subMudle1: dependentModule1
+    };
+    
+    return mainModule;
+})
+```
+
+2. 延迟依赖模块
+
+```
+define(function(){
+    var mainModule = {
+        subMudle1: require("dependentModule1.js")
+    };
+
     return mainModule;
 })
 ```
 
 
 ```
-define(["require"], function(require){
-    
+define(function(){
+    var mainModule = {};
+
+    return require(["dependentModule1.js"...], function(dependentModule1...){
+        mainModule.dependentModule1 = dependentModule1;
+        return mainModule;
+    });
 })
 ```
 
 
-```
-define(["require"], function(){
-    
-})
-```
+
+
 
 
 
@@ -297,4 +244,26 @@ define(function(require, exports, module){
 ```
 
 > 代码文件：/example/sync-load-cmd-module-exmaple.html
+
+
+### CMD规范示例
+
+```
+((root, factory) => {
+    if (typeof define === "function" && define.amd) {
+        //AMD
+        define(["dependentModule1", "dependentModule2"...], factory);
+    } else if (typeof exports === 'object') {
+        //CommonJS
+        module.exports = factory(requie("dependentModule1"), requie("dependentModule2")...);
+    } else {
+        root.currentModule = factory(root.dependentModule1, root.dependentModule2);
+    }
+})(
+    (typeof window == "object" && window) || (typeof global == "object" && global), 
+    (dependentModule1, dependentModule2...) => {
+        //todo
+    }
+)
+```
 
