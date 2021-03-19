@@ -1,7 +1,7 @@
 # ModuleJS
 
 ### 介绍
-ModuleJS，是一个遵循GMD、CMD、AMD、UMD规范的js模块管理
+ModuleJS，是一个遵循CMD、AMD、UMD规范的js模块管理
 
 ### 文件大小
 |文件名|文件大小|文件说明|
@@ -10,7 +10,9 @@ ModuleJS，是一个遵循GMD、CMD、AMD、UMD规范的js模块管理
 |require.min.js|2.4k|js代码压缩，用于生产运营时使用|
 |require.js|7.3k|js源代码，用于开发测试时使用|
 
-### 通过return导出模块
+### 定义返回模块（define return module）
+
+定义返回模块（define return module），指通过“define”定义模块，通过“return”返回模块。
 
 ```
 define(function(){
@@ -18,7 +20,8 @@ define(function(){
 })
 ```
 
-|全局变量模块的导入方式|是否支持|
+不同导入方式对“定义返回模块”的导入支持：
+|导入方式|是否支持|
 |--|--|
 |HTML Script|×|
 |AMD规范/RequireJS|√|
@@ -27,11 +30,18 @@ define(function(){
 |ES Module规范|×|
 |ModuleJS|√|
 
+### 导出模块（export module）
 
-### 通过exports导出模块
+导出模块（export module），指通过global、return、exports、module.exports、export进行导出模块。
 
 
-1. 通过define默认参数的exports导出模块
+### 定义导出模块（define exports module）
+
+定义导出模块（define exports module），指通过“define”定义模块，通过“exports”或“module.exports”导出模块。
+
+### 定义依赖导出模块（define dependent exports mocule）
+
+1. 定义导出模块（define exports module），指通过“define”定义模块，通过默认参数的exports导出模块
 
 ```
 define(function(require, exports, module){
@@ -49,7 +59,8 @@ define(["exports"], function(exports){
 })
 ```
 
-|全局变量模块的导入方式|是否支持|
+不同导入方式是否支持导入全局变量模块：
+|导入方式|导入支持|
 |--|--|
 |HTML Script|×|
 |AMD规范/RequireJS|√|
@@ -93,9 +104,17 @@ define(["module"], function(module){
 
 3. CommonJS规范
 
-```
-module.exports = ... //导出任意数据类型的模块
-```
+
+
+
+|导入方式|是否支持|
+|--|--|
+|HTML Script|√|
+|AMD规范/RequireJS|√|
+|CMD规范|√|
+|CommonJS规范|√|
+|ES Module规范|√|
+|ModuleJS|√|
 
 ### 通过全局变量导出模块
 
